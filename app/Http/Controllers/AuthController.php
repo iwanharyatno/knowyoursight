@@ -41,6 +41,8 @@ class AuthController extends BaseController
             $success['user'] = $user;
 
             return $this->sendResponse($success, 'User login successfully');
+        } else {
+            return $this->sendError('User not found!');
         }
     }
 }
