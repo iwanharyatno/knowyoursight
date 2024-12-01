@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,12 +14,29 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->api(
+            prepend: [
+                \App\Http\Middleware\ApiForceJsonResponse::class
+            ]
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->shouldRenderJsonWhen(function(Request $request, Throwable $err) {
+        $exceptions->shouldRenderJsonWhen(function(Request $request, Throwable $err) use ($exceptions) {
             if ($request->is('api/*')) {
-                return true;
+
+                if ($exceptions instanceof AuthorizationException) {
+                    return response()->json([
+                        'success' => false,
+                        'data' => null,
+                        'message' => 'Unauthenticated'
+                    ], 401);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'data' => null,
+                    'message' => 'No accept header!'
+                ], 401);
             }
 
             return $request->expectsJson();
