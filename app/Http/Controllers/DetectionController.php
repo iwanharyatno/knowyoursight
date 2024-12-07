@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Detection;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
+use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -45,5 +47,17 @@ class DetectionController extends BaseController
         $user->save();
 
         return $this->sendResponse($user, 'Detection allowed!');
+    }
+
+    public function printDetection(Request $request, $id) {
+        $user = User::find(Auth::user()->id);
+        $detection = Detection::find($id);
+
+        $pdf = FacadePdf::loadView('detection-print', [
+            'detection' => $detection,
+            'user' => $user
+        ]);
+
+        return $pdf->stream('kys-detection.pdf');
     }
 }

@@ -22,5 +22,6 @@ Route::controller(DetectionController::class)->group(function() {
         Route::get('detections', 'index');
         Route::post('detections', 'store');
         Route::post('pre-detect', 'preDetect');
+        Route::get('print-detection/{id}', 'printDetection');
     });
 });
