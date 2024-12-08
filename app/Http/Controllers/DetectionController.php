@@ -3,18 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Detection;
+use App\Models\DetectionImage;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\ErrorHandler\Debug;
 
 class DetectionController extends BaseController
 {
     public function index() {
-        $user = User::with('detections')->find(Auth::user()->id);
+        $user = User::with('detections.image')->find(Auth::user()->id);
 
         return $this->sendResponse($user, 'Successfully retrieve history');
     }
@@ -22,7 +24,8 @@ class DetectionController extends BaseController
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             'result' => 'required',
-            'recommendation' => 'required'
+            'recommendation' => 'required',
+            'image' => 'required|file'
         ]);
 
         if ($validator->fails()) {
@@ -32,6 +35,19 @@ class DetectionController extends BaseController
         $user = User::find(Auth::user()->id);
         $detection = new Detection($validator->validated());
         $user->detections()->save($detection);
+
+        if ($request->file('image')) {
+	        $storagePath = Storage::disk('google')->putFile('', $request->file('image'));;
+	
+	        $image = $detection->image()->create([
+                'path' => $storagePath
+            ]);
+	
+	        return response()->json([
+	            'message' => 'Uploaded!',
+	            'image' => $image
+	        ]);
+        }
 
         return $this->sendResponse($detection, 'Saved successfully!');
     }

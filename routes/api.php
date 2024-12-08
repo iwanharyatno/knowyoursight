@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DetectionController;
+use App\Http\Controllers\ImageController;
+use Google\Service\BeyondCorp\ImageConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +27,5 @@ Route::controller(DetectionController::class)->group(function() {
         Route::get('print-detection/{id}', 'printDetection');
     });
 });
+
+Route::get('/images/{path}', [ImageController::class, 'show']);
