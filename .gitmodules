@@ -1,0 +1,6 @@
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/Jimly23/know-your-sight
+[submodule "ml-model"]
+	path = ml-model
+	url = https://github.com/dlzcods/eye-disease-classification
